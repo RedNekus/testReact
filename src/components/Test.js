@@ -1,5 +1,5 @@
 'use client';
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState, createRef } from 'react'
 import QuestionCard from '@/components/QuestionCard'
 import { StyledTest, StyledTitle } from '@/components/styles'
 
@@ -9,7 +9,7 @@ const testData = [
         'личные денежные средства, выделенные банком третьей стороне согласно условиям и объёму, указанным в договоре займа',
         'заимствованные средства, переданные банком другому лицу'
     ]},
-    {'question': 'Какими методами можно гарантировать выполнение условий по кредит?', 'answers': [
+    {'question': 'Какими методами можно гарантировать выполнение условий по кредиту?', 'answers': [
         'гарантирование выполнения условий кредита возможно через гарантии от физических лиц, пеня за нарушение условий, предоставление в залог собственности заёмщика или кого-то ещё (включая жилые здания или другие виды недвижимости, такие как квартиры и гаражи), страховку от неоплаты кредита, а также другие методы, которые разрешены законами Республики Беларусь или указаны в договоре;',
         'через личное поручительство и залог как недвижимости, так и движимого имущества',
         'посредством залога имущества, будь то недвижимость или движимое имущество'
@@ -65,40 +65,49 @@ const testResult = [0, 0, 0, 0, 0, 1, 2, 1, 2, 0, 2]
 
 export default function () {
     const [show, setShow] = useState(false);
+    const [result, setResult] = useState(0);
+    const [trueAnswers, setTrueValue] = useState(0);
+    const [word, setWord] = useState('правильных ответов');
 
-    const props = {
-        answers: Array(11).fill(null),
-        currentQuestion: 0,
-        lastIndex: 11
-
-    }
-    
-    const handleClick = () => {
-        if(props.lastIndex > props.currentQuestion) {
-            props.answers[props.currentQuestion] = props.currentQuestion ** 2;
-            props.currentQuestion += 1;
-            console.log(props.answers)
+    const handleClick = (e) => {
+        if(e.target.value == testResult[e.target.id]) {
+            setTrueValue(trueAnswers + 1)
         }
-    };
-  
-    //const but = useRef(null)
-/*
+        setResult(result + 1)
+    }
+
     useEffect(() => {
-      but.current.addEventListener('click', handleClick);
-      return () => {
-        but.current.removeEventListener('click', handleClick);
-      };
-    }, [but]);
-*/
+        if(trueAnswers%100 > 10 && trueAnswers%100 < 20) {
+            setWord('правильных ответов');
+        }
+        else if(trueAnswers%10 == 1) {
+            setWord('правильный ответ');
+        }
+        else if(trueAnswers%10 > 1 && trueAnswers%10 <=4) {
+            setWord('правильных ответа');
+        } else {
+            setWord('правильных ответов');
+        }
+    }, [trueAnswers])
+
     return (
         <StyledTest>
-            <StyledTitle>TEST TEST</StyledTitle>
-            <button data-action="start" onClick={() => setShow(!show)}>Пройти тест</button>
+            <StyledTitle>Тест «Как одолжить деньги»</StyledTitle>
+            {!show && <button onClick={() => setShow(!show)}>Пройти тест</button>}
             {show && <StyledTest.Body>
-            {testData.map((item, key) => (
-                <QuestionCard question={item} num={key} trueAnswer={key}/>
+            {testData.map((item, i) => (
+                <QuestionCard
+                    question={item}
+                    key={`block-${i}`}
+                    num = {i}
+                    trueAnswer={testResult[i]}
+                    func={handleClick}
+                />
             ))}
             </StyledTest.Body>}
+            {(result >= 11) && <StyledTest.Result>
+                У вас {trueAnswers} {word} из 11 или {(trueAnswers/11*100).toFixed(2)}%
+            </StyledTest.Result>}
         </StyledTest>
     )
 }
