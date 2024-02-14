@@ -1,7 +1,7 @@
 'use client';
 import { useEffect, useRef, useState, createRef } from 'react'
 import QuestionCard from '@/components/QuestionCard'
-import { StyledTest, StyledTitle } from '@/components/styles'
+import { StyledTest, StyledTitle, StyledText, StyledButton } from '@/components/styles'
 
 const testData = [
     {'question': 'Что такое кредит?', 'answers': [
@@ -61,19 +61,30 @@ const testData = [
     ]},
 ]
 
+const resutTexts = [
+    'Вам не хватает знаний. Но это не беда. Приходите в "Центр финансовых консультаций" и мы всё подробно и понятно объясним, поможем подобрать выгодный кредит. Звоните нам по телефону +375(29)888-3-222 или приходите к нам по адресу: Минск, пр-кт Независимости, д. 58, к. 4, пом. 435.',
+    'Вы знаете немало. Но всё же есть вопросы, в которых стоит подтянуть свои знания. Чтобы лучше разбираться в кредитах приходите в "Центр финансовых консультаций" и мы ответим на все Ваши вопросы, подберём самое выгодное предложение по кредиту. Звоните нам по телефону +375(29)888-3-222 или приходите к нам по адресу: Минск, пр-кт Независимости, д. 58, к. 4, пом. 435.',
+    'Вы молодец! У Вас отличная финансовая грамотность! Если Вам нужен кредит, приходите к нам в "Центр финансовых консультаций". Звоните нам по телефону +375(29)888-3-222 или приходите к нам по адресу: Минск, пр-кт Независимости, д. 58, к. 4, пом. 435.'
+    ]
+
 const testResult = [0, 0, 0, 0, 0, 1, 2, 1, 2, 0, 2]
 
 export default function () {
-    const [show, setShow] = useState(false);
-    const [result, setResult] = useState(0);
-    const [trueAnswers, setTrueValue] = useState(0);
-    const [word, setWord] = useState('правильных ответов');
+    const [show, setShow] = useState(false)
+    const [step, setStep] = useState(0)
+    const [trueAnswers, setTrueValue] = useState(0)
+    const [word, setWord] = useState('правильных ответов')
+    const [text, setText] = useState()
+    const body = useRef();
 
     const handleClick = (e) => {
         if(e.target.value == testResult[e.target.id]) {
             setTrueValue(trueAnswers + 1)
         }
-        setResult(result + 1)
+        setStep(step + 1)
+        console.log('set step');
+        setTimeout(() => body.current.scrollIntoView(false), 100);
+        //console.log(cards);
     }
 
     useEffect(() => {
@@ -88,25 +99,37 @@ export default function () {
         } else {
             setWord('правильных ответов');
         }
+        if(trueAnswers < 5) {
+            setText(0)
+        } else if(trueAnswers < 9) {
+            setText(1)
+        } else {
+            setText(2)
+        }
     }, [trueAnswers])
 
     return (
         <StyledTest>
             <StyledTitle>Тест «Как одолжить деньги»</StyledTitle>
-            {!show && <button onClick={() => setShow(!show)}>Пройти тест</button>}
-            {show && <StyledTest.Body>
+            {!show && <StyledButton onClick={() => setShow(!show)}>Пройти тест</StyledButton>}
+            <StyledTest.Body ref={body} className={!show ? 'is-hidden' : null}>
             {testData.map((item, i) => (
-                <QuestionCard
-                    question={item}
-                    key={`block-${i}`}
-                    num = {i}
-                    trueAnswer={testResult[i]}
-                    func={handleClick}
-                />
+                <StyledTest.Item className={step < i ? 'is-hidden' : null} key={i}>
+                    <QuestionCard
+                        question={item}
+                        key={`block-${i}`}
+                        num = {i}
+                        trueAnswer={testResult[i]}
+                        func={handleClick}
+                    />
+                </StyledTest.Item>
             ))}
-            </StyledTest.Body>}
-            {(result >= 11) && <StyledTest.Result>
-                У вас {trueAnswers} {word} из 11 или {(trueAnswers/11*100).toFixed(2)}%
+            </StyledTest.Body>
+            {(step >= 11) && <StyledTest.Result>
+                <StyledText>
+                    <p>У вас <strong>{trueAnswers}</strong> {word} из 11 или <strong>{(trueAnswers/11*100).toFixed(2)}%</strong></p>
+                    <p>{resutTexts[text]}</p>
+                </StyledText>
             </StyledTest.Result>}
         </StyledTest>
     )

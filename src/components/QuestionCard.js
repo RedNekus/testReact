@@ -1,8 +1,7 @@
 import { StyledTest } from '@/components/styles'
 import { useEffect, useRef, useState } from 'react'
 
-export default function ({question, trueAnswer, num, func}) {
-    //const [isActive, setActive] = useState(false);
+export default function ({question, trueAnswer, num, func,hiddenClass}) {
     const [disabled, setDisabled] = useState(false);
     const [activeId, setActiveId] = useState();
 
@@ -11,7 +10,6 @@ export default function ({question, trueAnswer, num, func}) {
     useEffect(() => {
         const listAnswersElements = Array.from(listAnswers.current.children)
         const checkTrue = (e) => {
-            //setActive(true);
             setDisabled(true);
             setActiveId(e.target.value);
 
@@ -28,19 +26,37 @@ export default function ({question, trueAnswer, num, func}) {
         
     }, [listAnswers])
 
+    useEffect(() => {
+        console.log('scroll');
+        //listAnswersElements[num + 1].scrollIntoView(alignToTop);
+    }, [disabled])
+
     return (
-        <StyledTest.Item>
-            <h3>{question.question}</h3>
+        <>
+            <h3>{num + 1}. {question.question}</h3>
             {question.answers ? (
             <StyledTest.Answers data-num={num} ref={listAnswers}>
                 {question.answers && question.answers.map((item, i)=> (
-                    <StyledTest.Answer className={activeId == i ? "is-checked" : ""} key={`answer-${num}-${i}`}>
-                        <input type="radio" name={num} id={num} value={i} disabled = {disabled} onChange={func} />
-                        <span>{item}</span>
+                    <StyledTest.Answer className={activeId == i ? "is-checked" : null} key={`answer-${num}-${i}`}>
+                        <StyledTest.Label 
+                            type="list"
+                            checked={activeId == i}
+                        >
+                            <input 
+                                type="radio"
+                                name={num}
+                                id={num}
+                                value={i}
+                                disabled = {disabled}
+                                onChange={func}
+                                checked={activeId == i}
+                            />
+                            {item}
+                        </StyledTest.Label>
                     </StyledTest.Answer>
                 ))}
             </StyledTest.Answers>
             ) : ('')}
-        </StyledTest.Item>
+        </>
     )
 }
